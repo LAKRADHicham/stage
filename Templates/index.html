@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Documentation Technique</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <h1>Documentation Technique</h1>
+    </div>
+    <div class="header-green"></div>
+
+    <div class="container">
+        <form method="POST">
+            <input type="text" name="search" placeholder="Rechercher un document PDF...">
+            <button type="submit">🔍 Rechercher</button>
+        </form>
+        {% if message %}
+            <p style="color:red;">{{ message }}</p>
+        {% endif %}
+
+        {% if results %}
+            <div class="result-block">
+                <h2>Résultats de la recherche :</h2>
+                <ul>
+                    {% for file, path in results %}
+                    <li>
+                        {{ file }}<br>
+                        <a href="{{ url_for('view_document', path=path) }}">👁️ Afficher</a> |
+                        <a href="{{ url_for('download_document', path=path) }}">📥 Télécharger</a> |
+                        <button onclick="window.open('{{ url_for('static', filename='documents/' + path) }}', '_blank').print();">🖨️ Imprimer</button>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="folder-list">
+            <h2>Contenu des catégories</h2>
+            {% for cat, sous_dossiers in dossiers.items() %}
+                <h3>{{ cat }}</h3>
+                <ul>
+                    {% for sd in sous_dossiers %}
+                        <li>{{ sd }}</li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

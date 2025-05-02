@@ -1,0 +1,41 @@
+import os
+from flask import Flask, render_template, request, send_file, redirect, url_for
+from urllib.parse import quote
+
+app = Flask(__name__)
+
+# Chemin racine vers les documents
+DOCUMENTS_FOLDER = os.path.join('static', 'documents')
+CATEGORIES = ['Gammes operatoires', 'Procedures maintenance', 'REX']
+
+def rechercher_documents(term):
+    results = []
+    for category in CATEGORIES:
+        base_path = os.path.join(DOCUMENTS_FOLDER, category)
+        for root, dirs, files in os.walk(base_path):
+            for file in files:
+                if term.lower() in file.lower():
+                    full_path = os.path.join(root, file)
+                    relative_path = os.path.relpath(full_path, start=DOCUMENTS_FOLDER)
+                    results.append((file, relative_path.replace('\\', '/')))
+    return results
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    results = []
+    if request.method == 'POST':
+        search_term = request.form['search']
+        results = rechercher_documents(search_term)
+    return render_template('index.html', results=results)
+
+@app.route('/view/<path:path>')
+def view_document(path):
+    return render_template('view_document.html', file_path=path)
+
+@app.route('/download/<path:path>')
+def download_document(path):
+    file_path = os.path.join(DOCUMENTS_FOLDER, path)
+    return send_file(file_path, as_attachment=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
