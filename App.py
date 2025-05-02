@@ -14,23 +14,6 @@ def lister_sous_dossiers():
         structure[cat] = sous_dossiers
     return structure
 
-def lister_documents_par_categorie():
-    documents = {}
-    for cat in CATEGORIES:
-        chemin_categorie = os.path.join(DOCUMENTS_FOLDER, cat)
-        categorie_docs = {}
-        
-        # Parcourir les sous-dossiers de la catégorie
-        for sous_dossier in os.listdir(chemin_categorie):
-            chemin_sous_dossier = os.path.join(chemin_categorie, sous_dossier)
-            if os.path.isdir(chemin_sous_dossier):
-                # Lister les fichiers PDF dans le sous-dossier
-                fichiers = [f for f in os.listdir(chemin_sous_dossier) if f.lower().endswith('.pdf')]
-                categorie_docs[sous_dossier] = fichiers
-        
-        documents[cat] = categorie_docs
-    return documents
-
 def rechercher_documents(term):
     results = []
     for category in CATEGORIES:
@@ -46,24 +29,15 @@ def rechercher_documents(term):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     dossiers = lister_sous_dossiers()
-    documents = lister_documents_par_categorie()
     results = []
     message = ""
-    
     if request.method == 'POST':
-        if 'search' in request.form:
-            search_term = request.form.get('search')
-            if not search_term:
-                message = "Veuillez renseigner la barre de recherche."
-            else:
-                results = rechercher_documents(search_term)
-    
-    return render_template('index.html', 
-                         results=results, 
-                         dossiers=dossiers, 
-                         documents=documents,
-                         message=message,
-                         categories=CATEGORIES)
+        search_term = request.form.get('search')
+        if not search_term:
+            message = "Veuillez renseigner la barre de recherche."
+        else:
+            results = rechercher_documents(search_term)
+    return render_template('index.html', results=results, dossiers=dossiers, message=message)
 
 @app.route('/view/<path:path>')
 def view_document(path):
